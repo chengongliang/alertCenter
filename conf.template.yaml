@@ -1,0 +1,16 @@
+server:
+  port: 9001
+  token: ""
+sms:
+  regionId: ""
+  accessKeyId: ""
+  accessSecret: ""
+  signName: ""
+  templateCode: ""
+email:
+  address: ""
+  passwd: ""
+dingtalk:
+  robot:
+    test: "test_token"
+    op: "op_token"
