@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -32,9 +31,7 @@ func DingTalk(c *gin.Context) {
 	content = reqBody.Query["content"].(string)
 	token = config.DingTalk.Robot[robotName]
 	url = "https://oapi.dingtalk.com/robot/send?access_token=" + token
-	data = fmt.Sprintf(`{"msgtype": "text", "text": {"content": %s}}`, content)
-	fmt.Println(url, data)
-	os.Exit(1)
+	data = fmt.Sprintf(`{"msgtype": "text", "text": {"content": "%s"}}`, content)
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, strings.NewReader(data))
 	if err != nil {
@@ -48,8 +45,9 @@ func DingTalk(c *gin.Context) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		common.SendJSON(c, make(map[string]string, 0), 9001, err.Error())
 		panic(err)
 	}
-
 	fmt.Println(string(body))
+	common.SendJSON(c, "发送成功.")
 }

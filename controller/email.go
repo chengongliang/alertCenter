@@ -42,7 +42,7 @@ func Email(c *gin.Context) {
 	addr = config.Email.SMTPServer + ":" + config.Email.SMTPPort
 	auth = smtp.PlainAuth("", config.Email.UserName, config.Email.Password, config.Email.SMTPServer)
 	msg = fmt.Sprintf("To: %s\r\nFrom: %s\r\nSubject: %s\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", to, mailFrom, subject, mailType, content)
-	toList = strings.Split(strings.TrimSuffix(to, ";"), ";")
+	toList = strings.Split(strings.TrimSuffix(to, ","), ",")
 	err = smtp.SendMail(
 		addr,
 		auth,
