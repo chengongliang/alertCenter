@@ -4,12 +4,15 @@ server:
 sms:
   regionId: ""
   accessKeyId: ""
-  accessSecret: ""
+  accessSecret: "u"
   signName: ""
   templateCode: ""
 email:
-  address: ""
-  passwd: ""
+  userName: ""
+  password: ""
+  smtpServer: ""
+  smtpPort: "" # string
+  from: ""
 dingtalk:
   robot:
     test: "test_token"

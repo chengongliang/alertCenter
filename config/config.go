@@ -20,7 +20,6 @@ func initServer(v *viper.Viper) {
 	Server.Token = v.GetString("server.token")
 }
 
-// AliSMS 阿里短信相关
 type aliSMS struct {
 	RegionID     string
 	AccessKeyID  string
@@ -51,6 +50,25 @@ func initDingTalk(v *viper.Viper) {
 	DingTalk.Robot = v.GetStringMapString("dingtalk.robot")
 }
 
+type email struct {
+	UserName   string
+	Password   string
+	SMTPServer string
+	SMTPPort   string
+	From       string
+}
+
+// Email 邮件相关
+var Email email
+
+func initEmail(v *viper.Viper) {
+	Email.UserName = v.GetString("email.userName")
+	Email.Password = v.GetString("email.password")
+	Email.SMTPServer = v.GetString("email.smtpServer")
+	Email.SMTPPort = v.GetString("email.smtpPort")
+	Email.From = v.GetString("email.from")
+}
+
 func init() {
 	v := viper.New()
 	v.SetConfigName("conf")
@@ -63,4 +81,5 @@ func init() {
 	initServer(v)
 	initAliSMS(v)
 	initDingTalk(v)
+	initEmail(v)
 }
