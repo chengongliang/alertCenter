@@ -21,6 +21,7 @@ func Email(c *gin.Context) {
 		subject  string
 		mailType string
 		content  string
+		sender   string
 		auth     smtp.Auth
 		toList   []string
 		err      error
@@ -31,6 +32,7 @@ func Email(c *gin.Context) {
 		common.SendJSON(c, make(map[string]string, 0), 9001, err.Error())
 		return
 	}
+	sender = reqBody.Query["sender"].(string)
 	to = reqBody.Query["to"].(string)
 	subject = reqBody.Query["subject"].(string)
 	content = reqBody.Query["content"].(string)
@@ -38,30 +40,39 @@ func Email(c *gin.Context) {
 	if reqBody.Query["mail_type"].(string) == "html" {
 		mailType = "text/html"
 	}
-	mailFrom = config.Email.From
-	addr = config.Email.SMTPServer + ":" + config.Email.SMTPPort
-	auth = smtp.PlainAuth("", config.Email.UserName, config.Email.Password, config.Email.SMTPServer)
-	msg = fmt.Sprintf("To: %s\r\nFrom: %s\r\nSubject: %s\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", to, mailFrom, subject, mailType, content)
-	toList = strings.Split(strings.TrimSuffix(to, ","), ",")
-	err = smtp.SendMail(
-		addr,
-		auth,
-		config.Email.UserName,
-		toList,
-		[]byte(msg),
-	)
-	if err != nil {
-		fmt.Println(err.Error())
-		for _, receiver := range toList {
-			ToEach := []string{receiver}
-			smtp.SendMail(
-				addr,
-				auth,
-				config.Email.UserName,
-				ToEach,
-				[]byte(msg),
-			)
+	if s, ok := config.Email[sender]; ok {
+		mailFrom = s.From
+		addr = s.SMTPServer + ":" + s.SMTPPort
+		auth = smtp.PlainAuth("", s.UserName, s.Password, s.SMTPServer)
+		msg = fmt.Sprintf("To: %s\r\nFrom: %s\r\nSubject: %s\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", to, mailFrom, subject, mailType, content)
+		toList = strings.Split(strings.TrimSuffix(to, ","), ",")
+		err = smtp.SendMail(
+			addr,
+			auth,
+			s.UserName,
+			toList,
+			[]byte(msg),
+		)
+		if err != nil {
+			fmt.Println(err.Error())
+			for _, receiver := range toList {
+				toEach := []string{receiver}
+				smtp.SendMail(
+					addr,
+					auth,
+					s.UserName,
+					toEach,
+					[]byte(msg),
+				)
+			}
 		}
+		common.SendJSON(c, "邮件发送成功")
+	} else {
+		keys := make([]string, 0, len(config.Email))
+		for k := range config.Email {
+			keys = append(keys, k)
+		}
+		res := fmt.Sprintf("%v 未配置！已配置sender: %v", sender, keys)
+		common.SendJSON(c, make(map[string]string, 0), 9001, res)
 	}
-	common.SendJSON(c, "邮件发送成功")
 }

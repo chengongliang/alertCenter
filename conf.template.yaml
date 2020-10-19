@@ -8,11 +8,18 @@ sms:
   signName: ""
   templateCode: ""
 email:
-  userName: ""
-  password: ""
-  smtpServer: ""
-  smtpPort: "" # string
-  from: ""
+  sender1:
+    userName: ""
+    password: ""
+    smtpServer: ""
+    smtpPort: "" # string
+    from: ""
+  sender2:
+    userName: ""
+    password: ""
+    smtpServer: ""
+    smtpPort: "" # string
+    from: ""
 dingtalk:
   robot:
     test: "test_token"

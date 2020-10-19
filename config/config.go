@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -59,14 +60,20 @@ type email struct {
 }
 
 // Email 邮件相关
-var Email email
+var Email map[string]email
 
 func initEmail(v *viper.Viper) {
-	Email.UserName = v.GetString("email.userName")
-	Email.Password = v.GetString("email.password")
-	Email.SMTPServer = v.GetString("email.smtpServer")
-	Email.SMTPPort = v.GetString("email.smtpPort")
-	Email.From = v.GetString("email.from")
+	e := v.GetStringMap("email")
+	x, _ := json.Marshal(e)
+	err := json.Unmarshal([]byte(x), &Email)
+	if err != nil {
+		panic(fmt.Errorf(time.Now().Format("2006-01-02 15:04:05"), "Fatal error config file: %s \n", err))
+	}
+	// Email.UserName = v.GetString("email.userName")
+	// Email.Password = v.GetString("email.password")
+	// Email.SMTPServer = v.GetString("email.smtpServer")
+	// Email.SMTPPort = v.GetString("email.smtpPort")
+	// Email.From = v.GetString("email.from")
 }
 
 func init() {

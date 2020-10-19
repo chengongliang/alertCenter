@@ -35,19 +35,20 @@ func DingTalk(c *gin.Context) {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, strings.NewReader(data))
 	if err != nil {
-		panic(err)
+		common.SendJSON(c, make(map[string]string, 0), 9001, err.Error())
+		return
+		// panic(err)
 	}
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	resp, err := client.Do(req)
-
-	defer resp.Body.Close()
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		common.SendJSON(c, make(map[string]string, 0), 9001, err.Error())
-		panic(err)
+		return
+		// panic(err)
 	}
+	defer resp.Body.Close()
 	fmt.Println(string(body))
 	common.SendJSON(c, "发送成功.")
 }
