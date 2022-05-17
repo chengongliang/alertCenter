@@ -30,6 +30,7 @@
     "query": {
     	"mail_type": "text", # [text|html]
     	"subject":"告警通知",
+      "sender": "sender1",
     	"content": "xxx",
     	"to":"a@xx.com,b@xx.com" # 多个邮箱用`,`分割
     }
