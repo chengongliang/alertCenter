@@ -18,7 +18,7 @@ func main() {
 	gin.DisableConsoleColor()
 	logFile, err := os.OpenFile("./logs/info.log", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(-1)
 	}
 	gin.DefaultWriter = io.MultiWriter(logFile)

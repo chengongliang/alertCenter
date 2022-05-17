@@ -4,9 +4,12 @@ import (
 	"alertCenter/config"
 	"alertCenter/controller/common"
 	"alertCenter/model"
+	"crypto/tls"
 	"fmt"
-	"net/smtp"
+	"strconv"
 	"strings"
+
+	"gopkg.in/gomail.v2"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,21 +18,17 @@ import (
 func Email(c *gin.Context) {
 	var (
 		to       string
-		msg      string
-		addr     string
-		mailFrom string
 		subject  string
 		mailType string
 		content  string
 		sender   string
-		auth     smtp.Auth
 		toList   []string
 		err      error
 		reqBody  model.ReqBody
 	)
 
 	if err = c.ShouldBindJSON(&reqBody); err != nil {
-		common.SendJSON(c, make(map[string]string, 0), 9001, err.Error())
+		common.SendJSON(c, make(map[string]string), 9001, err.Error())
 		return
 	}
 	sender = reqBody.Query["sender"].(string)
@@ -41,30 +40,22 @@ func Email(c *gin.Context) {
 		mailType = "text/html"
 	}
 	if s, ok := config.Email[sender]; ok {
-		mailFrom = s.From
-		addr = s.SMTPServer + ":" + s.SMTPPort
-		auth = smtp.PlainAuth("", s.UserName, s.Password, s.SMTPServer)
-		msg = fmt.Sprintf("To: %s\r\nFrom: %s\r\nSubject: %s\r\nContent-Type: %s; charset=UTF-8\r\n\r\n%s", to, mailFrom, subject, mailType, content)
+		port := 587
+		if port, err = strconv.Atoi(s.SMTPPort); err != nil {
+			common.SendJSON(c, make(map[string]string), 9001, err.Error())
+		}
 		toList = strings.Split(strings.TrimSuffix(to, ","), ",")
-		err = smtp.SendMail(
-			addr,
-			auth,
-			s.UserName,
-			toList,
-			[]byte(msg),
-		)
-		if err != nil {
-			fmt.Println(err.Error())
-			for _, receiver := range toList {
-				toEach := []string{receiver}
-				smtp.SendMail(
-					addr,
-					auth,
-					s.UserName,
-					toEach,
-					[]byte(msg),
-				)
-			}
+		m := gomail.NewMessage()
+		m.SetHeader("From", s.From)
+		m.SetHeader("To", toList...)
+		m.SetHeader("Subject", subject)
+		m.SetBody(mailType, content)
+		d := gomail.NewDialer(s.SMTPServer, port, s.UserName, s.Password)
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+		fmt.Println(d)
+		if err := d.DialAndSend(m); err != nil {
+			fmt.Println(err)
+			d.DialAndSend(m)
 		}
 		common.SendJSON(c, "邮件发送成功")
 	} else {
@@ -73,6 +64,6 @@ func Email(c *gin.Context) {
 			keys = append(keys, k)
 		}
 		res := fmt.Sprintf("%v 未配置！已配置sender: %v", sender, keys)
-		common.SendJSON(c, make(map[string]string, 0), 9001, res)
+		common.SendJSON(c, make(map[string]string), 9001, res)
 	}
 }
