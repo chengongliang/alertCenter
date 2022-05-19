@@ -17,14 +17,14 @@ import (
 // Email 邮件通道
 func Email(c *gin.Context) {
 	var (
-		to       string
-		subject  string
-		mailType string
-		content  string
-		sender   string
-		toList   []string
-		err      error
-		reqBody  model.ReqBody
+		to      string
+		subject string
+		msgType string
+		content string
+		sender  string
+		toList  []string
+		err     error
+		reqBody model.ReqBody
 	)
 
 	if err = c.ShouldBindJSON(&reqBody); err != nil {
@@ -35,9 +35,9 @@ func Email(c *gin.Context) {
 	to = reqBody.Query["to"].(string)
 	subject = reqBody.Query["subject"].(string)
 	content = reqBody.Query["content"].(string)
-	mailType = "text/plain"
-	if reqBody.Query["mail_type"].(string) == "html" {
-		mailType = "text/html"
+	msgType = "text/plain"
+	if reqBody.Query["msgtype"].(string) == "html" {
+		msgType = "text/html"
 	}
 	if s, ok := config.Email[sender]; ok {
 		port := 587
@@ -49,7 +49,7 @@ func Email(c *gin.Context) {
 		m.SetHeader("From", s.From)
 		m.SetHeader("To", toList...)
 		m.SetHeader("Subject", subject)
-		m.SetBody(mailType, content)
+		m.SetBody(msgType, content)
 		d := gomail.NewDialer(s.SMTPServer, port, s.UserName, s.Password)
 		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 		fmt.Println(d)

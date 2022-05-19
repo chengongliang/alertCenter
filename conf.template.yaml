@@ -1,10 +1,10 @@
 server:
   port: 9001
-  token: ""
+  token: "" # 请求时做简单认证
 sms:
   regionId: ""
   accessKeyId: ""
-  accessSecret: "u"
+  accessSecret: ""
   signName: ""
   templateCode: ""
 email:
